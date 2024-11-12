@@ -1,0 +1,20 @@
+{
+  "clientes": [
+    {
+      "codigo": "001",
+      "loja": "L01",
+      "nome": "João Silva",
+      "pessoa": "F",
+      "cep": "12345678",
+      "estado": "SP",
+      "status": "1",
+      "cnpj": "12345678000195",
+      "tipo": "F",
+      "ddd": "11",
+      "telefone": "987654321",
+      "email": "joao@exemplo.com",
+      "pais": "Brasil",
+      "contato": "João"
+    }
+  ]
+}
