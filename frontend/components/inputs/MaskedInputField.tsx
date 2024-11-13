@@ -1,10 +1,12 @@
 // MaskedInputField.tsx
-import React from 'react';
+import React, { Fragment } from 'react';
 import { TextField } from '@mui/material';
 import InputMask from 'react-input-mask';
 
 const MaskedInputField = ({ name, label, register, mask, errors, disabled }: any) => (
-  <InputMask
+  <div className='flex flex-col w-full'>
+    <label>{label}</label>
+    <InputMask
     mask={mask}
     {...register(name)}
     disabled={disabled}
@@ -12,13 +14,13 @@ const MaskedInputField = ({ name, label, register, mask, errors, disabled }: any
     {(inputProps: any) => (
       <TextField
         {...inputProps}
-        label={label}
         error={!!errors[name]}
         helperText={errors[name]?.message}
         fullWidth
       />
     )}
   </InputMask>
+  </div>
 );
 
 export default MaskedInputField;

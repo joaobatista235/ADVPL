@@ -9,10 +9,11 @@ const useUserData = (user: FormData | undefined, setValue: any) => {
     const fetchUserData = async () => {
       if (!user) return;
       try {
-        const { data } = await axios.get(`http://127.0.0.7:8091/restapi/lista_cliente?loja=${user.loja}&codigo=${user.codigo}`, {
+        const { data } = await axios.get(`http://127.0.0.7:8091/restapi/clientes/lista_cliente?loja=${user.loja}&codigo=${user.codigo}`, {
           headers: { Authorization: 'Basic YWRtaW46IA==' }
         });
-        Object.entries(data).forEach(([key, value]) => setValue(key, value));
+        console.log(data)
+        setValue(data.items[0])
       } catch (error) {
         toast.error("Erro ao buscar o cliente", { position: "bottom-right" });
       }

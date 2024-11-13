@@ -28,6 +28,7 @@ const formatStatusName = (status: string) => {
 }
 
 const ClientTable: React.FC<ClientTableProps> = ({ clients, onViewClient, refresh }) => {
+
   const mutationOptions = {
     onError: () => {
       toast.error("Erro na operação!", { position: "bottom-right" });

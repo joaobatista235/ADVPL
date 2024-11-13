@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Fade, Modal, Box } from '@mui/material';
@@ -21,6 +21,8 @@ interface AddProductModalProps {
 
 const AddProductModal = ({ open, handleClose, user, refresh }: AddProductModalProps) => {
   const [showAddressFields, setShowAddressFields] = useState(false);
+  const [dataValue, setDataValue] = useState<FormData>({} as FormData)
+  console.log(dataValue)
 
   const { register, handleSubmit, setValue, watch, formState: { errors, isDirty, isValid }, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -29,14 +31,17 @@ const AddProductModal = ({ open, handleClose, user, refresh }: AddProductModalPr
 
   const cep = watch('cep');
   const pessoa = watch('pessoa');
+  const watchType = watch('tipo')
+  const watchStatus = watch('status')
 
-  useUserData(user ?? undefined, setValue);
+  useUserData(user ?? undefined, setDataValue);
   useAddressData(cep, setValue, setShowAddressFields);
 
   const handleCloseModal = () => {
     reset();
     setShowAddressFields(false);
     handleClose();
+    setDataValue({} as FormData)
   };
 
   const mutationOptions = {
@@ -51,16 +56,53 @@ const AddProductModal = ({ open, handleClose, user, refresh }: AddProductModalPr
     }
   };
 
+  const limparCpfCnpj = (str: string) => {
+    return str.replace(/[.\-/]/g, '');
+  };
+  
   const onSubmit = useMutation({
     mutationFn: async (data: FormData) => {
-      const url = user ? `http://127.0.0.7:8091/restapi/clientes/atualizar?loja=${data.loja}&codigo=${data.codigo}` : 'http://127.0.0.7:8091/restapi/clientes/incluir';
+      // Limpar o CNPJ antes de enviar
+      if (data.cnpj) {
+        data.cnpj = limparCpfCnpj(data.cnpj);
+      }
+  
+      const url = user 
+        ? `http://127.0.0.7:8091/restapi/clientes/atualizar?loja=${data.loja}&codigo=${data.codigo}` 
+        : 'http://127.0.0.7:8091/restapi/clientes/incluir';
+      
       const method = user ? 'put' : 'post';
+      console.log(data)
       await axios[method](url, data, {
         headers: { Authorization: 'Basic YWRtaW46IA==' }
       });
     },
     ...mutationOptions
   });
+
+  useEffect(() => {
+    if (dataValue) {
+     setValue("bairro", dataValue?.bairro)
+     setValue("cep", dataValue?.cep)
+     setValue("cidade", dataValue?.cidade)
+     setValue("cnpj", dataValue?.cnpj)
+     setValue("codigo", dataValue?.codigo)
+     setValue("contato", dataValue?.contato)
+     setValue("ddd", dataValue?.ddd)
+     setValue("email", dataValue?.email)
+     setValue("endereco", dataValue?.endereco)
+     setValue("estado", dataValue?.estado)
+     setValue("loja", dataValue?.loja)
+     //@ts-ignore
+     setValue("nome", dataValue?.razao)
+     setValue("pais", dataValue?.pais)
+     setValue("pessoa", dataValue?.pessoa)
+     setValue("status", dataValue?.status)
+     setValue("telefone", dataValue?.telefone)
+     setValue("tipo", dataValue?.tipo)
+    }
+   }, [dataValue])
+  
 
   return (
     <Modal open={open} onClose={handleCloseModal}>
@@ -87,6 +129,7 @@ const AddProductModal = ({ open, handleClose, user, refresh }: AddProductModalPr
             <SelectField
               name="pessoa"
               label="Pessoa"
+              value={pessoa}
               options={[
                 { value: 'F', label: 'Física' },
                 { value: 'J', label: 'Jurídica' }
@@ -128,6 +171,7 @@ const AddProductModal = ({ open, handleClose, user, refresh }: AddProductModalPr
             <SelectField
               name="status"
               label="Status"
+              value={watchStatus}
               options={[
                 { value: '1', label: 'Ativo' },
                 { value: '2', label: 'Inativo' }
@@ -139,6 +183,7 @@ const AddProductModal = ({ open, handleClose, user, refresh }: AddProductModalPr
             <SelectField
               name="tipo"
               label="Tipo"
+              value={watchType}
               options={[
                 { value: 'F', label: 'Fornecedor' },
                 { value: 'L', label: 'Loja' },
@@ -154,7 +199,7 @@ const AddProductModal = ({ open, handleClose, user, refresh }: AddProductModalPr
 
           <div className="flex gap-3">
             <InputField name="email" label="E-mail" register={register} errors={errors} disabled={false} />
-            <InputField name="pais" label="País" register={register} errors={errors} disabled={false} />
+            <InputField name="pais" label="País" hasLink register={register} errors={errors} disabled={false} />
           </div>
 
           <div className="flex gap-3">
@@ -180,6 +225,19 @@ const AddProductModal = ({ open, handleClose, user, refresh }: AddProductModalPr
                 </div>
               </div>
             </Fade>
+          )}
+
+          {Object.entries(dataValue).length > 0 && (
+              <div className="flex gap-3 flex-col">
+                <div className="flex gap-3">
+                  <InputField name="endereco" register={register} errors={errors} disabled={false} />
+                  <InputField name="bairro" register={register} errors={errors} disabled={false} />
+                </div>
+                <div className="flex gap-3">
+                  <InputField name="cidade" register={register} errors={errors} disabled={false} />
+                  <InputField name="estado" register={register} errors={errors} disabled={false} />
+                </div>
+              </div>
           )}
 
           <Button type="submit" variant="contained" disabled={!isDirty || !isValid}>
